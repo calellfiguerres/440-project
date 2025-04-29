@@ -9,6 +9,8 @@
 ## Usage Instructions
 Google Colab Notebook (Recommended): https://colab.research.google.com/drive/1Au9wdqiDRxNLKiYZ_6xCNbStk33Z-17h?usp=sharing
 
+Project Presentation Slides: https://docs.google.com/presentation/d/1BmiWHKrngC5fUt2pi1guOX2G_Ccyh5TQYKuFWMYBdcw/edit?usp=sharing
+
 Project Presentation Video: https://youtu.be/ZqZmeJKw7Yw
 
 Project Usage Video: https://youtu.be/NwffPz3OSV4
