@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/14Pr_PiLrOEacfJxvTwLBD9E2LPa7iGAx
 """
 
-# !pip install python-sat[aiger,approxmc,cryptosat]
+# !pip install matplotlib z3-solver python-sat[aiger,approxmc,cryptosat,pblib]
 
 """# Encoding Constraints
 
@@ -963,62 +963,62 @@ plot_data(data)
 
 """Solving using Z3 (prototype, feel free to modify)"""
 
-sudokuboard = []
+# sudokuboard = []
 
 """## Generating a solvable puzzle
 
 For ease of testing, we wrote a short function to generate a fully solved board and and another one to hide some of the obvious solution
 """
 
-import random
+# import random
 
-# Determines the value to be placed at position (r, c) based on a base pattern.
-def pattern(r, c, base):
-    return (base * (r % base) + r // base + c) % (base * base)
+# # Determines the value to be placed at position (r, c) based on a base pattern.
+# def pattern(r, c, base):
+#     return (base * (r % base) + r // base + c) % (base * base)
 
-# Returns a shuffled version of the input sequence.
-def shuffle(s):
-    s = list(s)  # Convert to list (in case input is a range or tuple)
-    random.shuffle(s)
-    return s
+# # Returns a shuffled version of the input sequence.
+# def shuffle(s):
+#     s = list(s)  # Convert to list (in case input is a range or tuple)
+#     random.shuffle(s)
+#     return s
 
-# Generates a full Sudoku board of size (base^2 x base^2)
-def generate_full_board(size, base):
-    numbers = list(range(1, size + 1))  # The digits to fill in the Sudoku grid
+# # Generates a full Sudoku board of size (base^2 x base^2)
+# def generate_full_board(size, base):
+#     numbers = list(range(1, size + 1))  # The digits to fill in the Sudoku grid
 
-    # Create a randomized order of rows and columns based on the base
-    rows = [g * base + r for g in shuffle(range(base)) for r in shuffle(range(base))]
-    cols = [g * base + c for g in shuffle(range(base)) for c in shuffle(range(base))]
+#     # Create a randomized order of rows and columns based on the base
+#     rows = [g * base + r for g in shuffle(range(base)) for r in shuffle(range(base))]
+#     cols = [g * base + c for g in shuffle(range(base)) for c in shuffle(range(base))]
 
-    nums = shuffle(numbers)  # Shuffle the digits to make a random valid board
+#     nums = shuffle(numbers)  # Shuffle the digits to make a random valid board
 
-    # Generate the board using the base pattern and shuffled values
-    board = [[nums[pattern(r, c, base)] for c in cols] for r in rows]
-    return board
+#     # Generate the board using the base pattern and shuffled values
+#     board = [[nums[pattern(r, c, base)] for c in cols] for r in rows]
+#     return board
 
-# Creates a Sudoku puzzle by removing cells from the full board based on a removal rate
-def remove_cells(board, removal_rate=0.5):
-    size = len(board)
-    puzzle = [row.copy() for row in board]  # Make a deep copy to preserve original board
+# # Creates a Sudoku puzzle by removing cells from the full board based on a removal rate
+# def remove_cells(board, removal_rate=0.5):
+#     size = len(board)
+#     puzzle = [row.copy() for row in board]  # Make a deep copy to preserve original board
 
-    # Randomly remove cells by setting them to 0 (typically represents empty cells in Sudoku)
-    for r in range(size):
-        for c in range(size):
-            if random.random() < removal_rate:
-                puzzle[r][c] = 0
-    return puzzle
+#     # Randomly remove cells by setting them to 0 (typically represents empty cells in Sudoku)
+#     for r in range(size):
+#         for c in range(size):
+#             if random.random() < removal_rate:
+#                 puzzle[r][c] = 0
+#     return puzzle
 
-# sample code: format to your own
-full_solution = generate_full_board(49, 7)
-puzzle = remove_cells(full_solution, removal_rate=0.45)
+# # sample code: format to your own
+# full_solution = generate_full_board(49, 7)
+# puzzle = remove_cells(full_solution, removal_rate=0.45)
 
-for line in puzzle:
-    print(line)
+# for line in puzzle:
+#     print(line)
 
-solved = solve_sudoku_with_z3(puzzle)
+# solved = solve_sudoku_with_z3(puzzle)
 
-for line in solved:
-    print(line)
+# for line in solved:
+#     print(line)
 
 """Testing Function"""
 
@@ -1070,146 +1070,146 @@ def is_valid_solution(board, solved_board):
 #     r = x // (n * n)
 #     return r, c, v
 
-def generate_CNF_constraints1(n):
+# def generate_CNF_constraints1(n):
 
-    # Declare our cnf to hold all of the clauses
-    # Each clause will be a list
-    cnf = CNF()
-    N = n * n
+#     # Declare our cnf to hold all of the clauses
+#     # Each clause will be a list
+#     cnf = CNF()
+#     N = n * n
 
-    # Constraint 1: Each cell may only have one value
-    for r in range(N):
-        for c in range(N):
-          cnf.append([var(r, c, v, n) for v in range(N)]) # A cell must have a value
-          for vA in range(N):
-            for vB in range(vA + 1, N):
-                cnf.append([-var(r, c, vA, n), -var(r, c, vB, n)]) # Ensures a cell can't hold two values
+#     # Constraint 1: Each cell may only have one value
+#     for r in range(N):
+#         for c in range(N):
+#           cnf.append([var(r, c, v, n) for v in range(N)]) # A cell must have a value
+#           for vA in range(N):
+#             for vB in range(vA + 1, N):
+#                 cnf.append([-var(r, c, vA, n), -var(r, c, vB, n)]) # Ensures a cell can't hold two values
 
-    # Constraint 3: Each row must have one of each number
-    for r in range(N): # Go through each row
-        for v in range(N): # Go through all possible values from 1 - N
+#     # Constraint 3: Each row must have one of each number
+#     for r in range(N): # Go through each row
+#         for v in range(N): # Go through all possible values from 1 - N
 
-            # OR condition for all possible columns to contain value v
-            cnf.append([var(r, c, v, n) for c in range(N)]) # A column has one of each number from 1 - N
+#             # OR condition for all possible columns to contain value v
+#             cnf.append([var(r, c, v, n) for c in range(N)]) # A column has one of each number from 1 - N
 
-            # These loops allow us to compare all columns for this given r and make sure they don't have duplicates.
-            # cA and cB represent two different columns, they will never be the same given the loop
-            for cA in range(N):
-                for cB in range(cA + 1, N):
+#             # These loops allow us to compare all columns for this given r and make sure they don't have duplicates.
+#             # cA and cB represent two different columns, they will never be the same given the loop
+#             for cA in range(N):
+#                 for cB in range(cA + 1, N):
 
-                    # States that no column in the same row can have the same value
-                    # REMEMBER: Negative values mean false literal
-                    cnf.append([-var(r, cA, v, n), -var(r, cB, v, n)])
+#                     # States that no column in the same row can have the same value
+#                     # REMEMBER: Negative values mean false literal
+#                     cnf.append([-var(r, cA, v, n), -var(r, cB, v, n)])
 
-    # Constraint 4: Each column must have oen of each number
-    for c in range(N):
-      for v in range(N):
-          cnf.append([var(r, c, v, n) for r in range(N)]) # A row must have one of each value
-          for rA in range(N):
-              for rB in range(rA + 1, N):
-                  cnf.append([-var(rA, c, v, n), -var(rB, c, v, n)]) # A row cannot have two of the same value
+#     # Constraint 4: Each column must have oen of each number
+#     for c in range(N):
+#       for v in range(N):
+#           cnf.append([var(r, c, v, n) for r in range(N)]) # A row must have one of each value
+#           for rA in range(N):
+#               for rB in range(rA + 1, N):
+#                   cnf.append([-var(rA, c, v, n), -var(rB, c, v, n)]) # A row cannot have two of the same value
 
-    # Constraint 5: Each subgrid must have one of each number
-    # This is a pain to encode :(
-    for block_row in range(n):
-        for block_col in range(n):
+#     # Constraint 5: Each subgrid must have one of each number
+#     # This is a pain to encode :(
+#     for block_row in range(n):
+#         for block_col in range(n):
 
-            for v in range(N):
+#             for v in range(N):
 
-                # Enforces that a n x n block has one of each value 1 - N
-                block = [
-                    # My way of being able to capture the positions of the cells within a subgrid
-                    var(row, col, v, n)
-                    for row in range(block_row * n, (block_row + 1) * n)
-                    for col in range(block_col * n, (block_col + 1) * n)
-                ]
+#                 # Enforces that a n x n block has one of each value 1 - N
+#                 block = [
+#                     # My way of being able to capture the positions of the cells within a subgrid
+#                     var(row, col, v, n)
+#                     for row in range(block_row * n, (block_row + 1) * n)
+#                     for col in range(block_col * n, (block_col + 1) * n)
+#                 ]
 
-                for p1 in range(N): # Get a position in the block
-                    for p2 in range(p1 + 1, N): # Get a different position in the block
-                        cnf.append([-block[p1], -block[p2]]) # Make sure no two cells within a block have the same two values
+#                 for p1 in range(N): # Get a position in the block
+#                     for p2 in range(p1 + 1, N): # Get a different position in the block
+#                         cnf.append([-block[p1], -block[p2]]) # Make sure no two cells within a block have the same two values
 
-    # FINALLY return all of our cnf object that contains all clauses within inner lists
-    return cnf
+#     # FINALLY return all of our cnf object that contains all clauses within inner lists
+#     return cnf
 
-def add_clues1(puzzle, n, cnf):
-    N = n * n
+# def add_clues1(puzzle, n, cnf):
+#     N = n * n
 
-    # Go through all cells in the N x N grid
-    for r in range(N):
-        for c in range(N):
-            v = puzzle[r][c]
-            if v != 0: # If its a zero, we consider it to be blank and will skip over it
-                # We do a -1 as CNF formulas are 0 based
-                # The first possible value should be mapped to 0
-                cnf.append([var(r, c, v-1, n)])
+#     # Go through all cells in the N x N grid
+#     for r in range(N):
+#         for c in range(N):
+#             v = puzzle[r][c]
+#             if v != 0: # If its a zero, we consider it to be blank and will skip over it
+#                 # We do a -1 as CNF formulas are 0 based
+#                 # The first possible value should be mapped to 0
+#                 cnf.append([var(r, c, v-1, n)])
 
-    # Return our cnf with new clauses obtained from our clues added
-    return cnf
+#     # Return our cnf with new clauses obtained from our clues added
+#     return cnf
 
-from z3 import *
-import math
+# from z3 import *
+# import math
 
-def print_board(board):
-    # Prints the Sudoku board
-    for row in board:
-        print(" ".join(str(num) if num != 0 else '.' for num in row))
-    print()
+# def print_board(board):
+#     # Prints the Sudoku board
+#     for row in board:
+#         print(" ".join(str(num) if num != 0 else '.' for num in row))
+#     print()
 
-def solve_sudoku_with_z3(board):
-    # Solve the Sudoku puzzle
-    size = len(board)  # Get the total of line/column
-    n = int(math.sqrt(size))  # Calculate the subgrid size
-    if n * n != size: # If the subgrid size is inappropriate, raise error
-        raise ValueError("Board size must be a perfect square (n^2 x n^2)")
+# def solve_sudoku_with_z3(board):
+#     # Solve the Sudoku puzzle
+#     size = len(board)  # Get the total of line/column
+#     n = int(math.sqrt(size))  # Calculate the subgrid size
+#     if n * n != size: # If the subgrid size is inappropriate, raise error
+#         raise ValueError("Board size must be a perfect square (n^2 x n^2)")
 
-    solver = Solver()
+#     solver = Solver()
 
-    # Define an n^2 x n^2 matrix of integer variables
-    X = [[Int(f'x_{i}_{j}') for j in range(size)] for i in range(size)]
+#     # Define an n^2 x n^2 matrix of integer variables
+#     X = [[Int(f'x_{i}_{j}') for j in range(size)] for i in range(size)]
 
-    # Constraint: Each cell contains a value from 1 to n^2
-    for i in range(size):
-        for j in range(size):
-            solver.add(And(1 <= X[i][j], X[i][j] <= size))
+#     # Constraint: Each cell contains a value from 1 to n^2
+#     for i in range(size):
+#         for j in range(size):
+#             solver.add(And(1 <= X[i][j], X[i][j] <= size))
 
-    # Constraint: Each row must have distinct values
-    for i in range(size):
-        solver.add(Distinct(X[i]))
+#     # Constraint: Each row must have distinct values
+#     for i in range(size):
+#         solver.add(Distinct(X[i]))
 
-    # Constraint: Each column must have distinct values
-    for j in range(size):
-        solver.add(Distinct([X[i][j] for i in range(size)]))
+#     # Constraint: Each column must have distinct values
+#     for j in range(size):
+#         solver.add(Distinct([X[i][j] for i in range(size)]))
 
-    # Constraint: Each n x n sub-grid must have distinct values
-    for i in range(0, size, n):
-        for j in range(0, size, n):
-            solver.add(Distinct([X[i + di][j + dj] for di in range(n) for dj in range(n)]))
+#     # Constraint: Each n x n sub-grid must have distinct values
+#     for i in range(0, size, n):
+#         for j in range(0, size, n):
+#             solver.add(Distinct([X[i + di][j + dj] for di in range(n) for dj in range(n)]))
 
-    # Apply the initial board values as constraints
-    for i in range(size):
-        for j in range(size):
-            if board[i][j] != 0:
-                solver.add(X[i][j] == board[i][j])
+#     # Apply the initial board values as constraints
+#     for i in range(size):
+#         for j in range(size):
+#             if board[i][j] != 0:
+#                 solver.add(X[i][j] == board[i][j])
 
-    # Check if the board is solvable and return the solution if it is.
-    if solver.check() == sat:
-        model = solver.model()
-        solved_board = [[model.evaluate(X[i][j]).as_long() for j in range(size)] for i in range(size)]
-        return solved_board
-    else:
-        return ("Unsolvable puzzle")
+#     # Check if the board is solvable and return the solution if it is.
+#     if solver.check() == sat:
+#         model = solver.model()
+#         solved_board = [[model.evaluate(X[i][j]).as_long() for j in range(size)] for i in range(size)]
+#         return solved_board
+#     else:
+#         return ("Unsolvable puzzle")
 
-puzzle = [
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9]
-]
+# puzzle = [
+#     [5, 3, 0, 0, 7, 0, 0, 0, 0],
+#     [6, 0, 0, 1, 9, 5, 0, 0, 0],
+#     [0, 9, 8, 0, 0, 0, 0, 6, 0],
+#     [8, 0, 0, 0, 6, 0, 0, 0, 3],
+#     [4, 0, 0, 8, 0, 3, 0, 0, 1],
+#     [7, 0, 0, 0, 2, 0, 0, 0, 6],
+#     [0, 6, 0, 0, 0, 0, 2, 8, 0],
+#     [0, 0, 0, 4, 1, 9, 0, 0, 5],
+#     [0, 0, 0, 0, 8, 0, 0, 7, 9]
+# ]
 # puzzle = [
 #     [0, 4, 3, 2],
 #     [2, 3, 4, 1],
@@ -1217,7 +1217,7 @@ puzzle = [
 #     [3, 1, 2, 4]
 # ]
 
-n = 5  # For a 9x9 grid
+# n = 5  # For a 9x9 grid
 
 # Debug code
 # print(decode_var(1, 4))
@@ -1228,38 +1228,38 @@ n = 5  # For a 9x9 grid
 
 
 # Call our generator and construct all clauses for the rules of suduko
-cnf = generate_CNF_constraints(n)
+# cnf = generate_CNF_constraints(n)
 
 
-print("Total clauses:", len(cnf.clauses))
-
-# Add all the numbers already filled in as clauses
-cnf = add_clues(puzzle, n, cnf)
-
-# Debugging code
-# print("Clues in puzzle:", sum(cell != 0 for row in puzzle for cell in row))
 # print("Total clauses:", len(cnf.clauses))
 
-# Get our SAT and feed in the cnf formulas we created
-solver = Solver()
-solver.append_formula(cnf)
+# # Add all the numbers already filled in as clauses
+# cnf = add_clues(puzzle, n, cnf)
 
-# This statement returns true if puzzle is satisfyiable
-if solver.solve():
-    model = solver.get_model()
-    N = n * n
-    solution = [[0 for _ in range(N)] for _ in range(N)]
+# # Debugging code
+# # print("Clues in puzzle:", sum(cell != 0 for row in puzzle for cell in row))
+# # print("Total clauses:", len(cnf.clauses))
 
-    # Go through our solution model fill in our 2d array by decoding each varaible
-    for val in model:
-        if val > 0:
-            r, c, v = decode_var(val, N)
-            # print(r, c, v)
-            solution[r-1][c-1] = v  # Add 1 to match 1-9 output
+# # Get our SAT and feed in the cnf formulas we created
+# solver = Solver()
+# solver.append_formula(cnf)
 
-    # Prints our solution
-    for row in solution:
-        print(" ".join(str(num) for num in row))
-else:
-    print("No solution found.")
-    # print("Total clauses:", len(cnf.clauses))
+# # This statement returns true if puzzle is satisfyiable
+# if solver.solve():
+#     model = solver.get_model()
+#     N = n * n
+#     solution = [[0 for _ in range(N)] for _ in range(N)]
+
+#     # Go through our solution model fill in our 2d array by decoding each varaible
+#     for val in model:
+#         if val > 0:
+#             r, c, v = decode_var(val, N)
+#             # print(r, c, v)
+#             solution[r-1][c-1] = v  # Add 1 to match 1-9 output
+
+#     # Prints our solution
+#     for row in solution:
+#         print(" ".join(str(num) for num in row))
+# else:
+#     print("No solution found.")
+#     # print("Total clauses:", len(cnf.clauses))
