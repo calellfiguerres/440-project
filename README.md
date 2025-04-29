@@ -11,7 +11,7 @@ Google Colab Notebook: https://colab.research.google.com/drive/1LgGzuXF9Bsqwq9V3
 
 ### Manual Usage
 0. Start Python3 virtual environment
-1. `pip install -r requirements.txt` or `pip install matplotlib z3-solver python-sat[aiger,approxmc,cryptosat,pblib]`
+1. `pip install -r requirements.txt` or `pip install jupyterlab matplotlib z3-solver python-sat[aiger,approxmc,cryptosat]`
 2. Start Jupyter Lab (e.g., `jupyter lab`)
 3. Open the `440_Project.ipynb` in Jupyter Lab
 4. Run all cells 
