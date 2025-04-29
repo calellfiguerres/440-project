@@ -7,7 +7,11 @@
 - Owen Downs
 
 ## Usage Instructions
-Google Colab Notebook: https://colab.research.google.com/drive/1LgGzuXF9Bsqwq9V3JSrUbZsfUKS0zMEI?usp=sharing
+Google Colab Notebook (Recommended): https://colab.research.google.com/drive/1Au9wdqiDRxNLKiYZ_6xCNbStk33Z-17h?usp=sharing
+
+Project Presentation Video: https://youtu.be/ZqZmeJKw7Yw
+
+Project Usage Video: https://youtu.be/NwffPz3OSV4
 
 ### Manual Usage
 0. Start Python3 virtual environment
